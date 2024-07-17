@@ -1,0 +1,21 @@
+{
+    "k":2000,
+    "index_file_path": "./data/kfashion_images_group.tsv",
+    "query_file_path": "./data/fashion_test_queries_reformated_eval_groq.csv",
+    "label_dir_path": "./data/k_fashion_labels/",
+    "use_retriever_cache": true,
+    "retriever_cache_path": "./tmp/retriever_full_tag_norm_None.pkl",
+    "tfidf_params": {
+        "use_idf": false,
+        "binary": false,
+        "norm": null,
+        "analyzer": "word"
+    },
+    "retrieval_kernel": "cosine_similarity",
+
+    "local_image_dir_abs_path":"<<NO_LOCAL_IMAGE_PATH_PREPARED>>",
+    "bucket_image_dir_path":"https://storage.googleapis.com/k_fashion_images/k_fashion_images",
+
+    "use_category_to_tags_cache": true,
+    "category_to_tags_cache_dir_path":"./tmp/"
+}

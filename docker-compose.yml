@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  image_retriever_keyword_based:
+    container_name: image_retriever_keyword_based
+    restart: always
+    command: bash ./scripts/1_run_rest_api.sh
+    build: .
+    ports:
+      - 8000:8000
+    env_file:
+      - .env
+    volumes:
+      - ./app:/app
+    environment:
+      - TZ=Asia/Seoul

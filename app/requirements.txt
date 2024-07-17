@@ -1,0 +1,10 @@
+uvicorn==0.30.1
+fastapi==0.111.1
+langchain==0.2.8
+langchain_community==0.2.7
+langchain_openai==0.1.16
+langchain_groq==0.1.6 
+editdistance==0.8.1
+image==1.5.33
+joblib
+scikit-learn

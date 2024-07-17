@@ -1,0 +1,2 @@
+*.pkl filter=lfs diff=lfs merge=lfs -text
+app/tmp/retriever_full_tag_norm_None.pkl/tfidf_vectorizer.pkl filter=lfs diff=lfs merge=lfs -text
