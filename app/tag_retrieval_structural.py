@@ -2,6 +2,7 @@ import dotenv
 dotenv.load_dotenv()
 
 import os
+import re
 import csv
 import json
 import tqdm
@@ -146,16 +147,28 @@ def sentence_to_tag(description, tags):
     ])
 
     chain = template|llm
+    # tmp_subcategory = ""
     tag_str = ""
+
     for i, t in enumerate(tags):
-        tag_str += f"{i+1}. {t}\n"
+        t_splited = t.split(":")
+        # if tmp_subcategory != t_splited[1]:
+        #     tag_str += "Tag Category: " + t_splited[1] +"\n"
+        #     tmp_subcategory = t_splited[1]
+        tag_str += f"{i+1}. {t_splited[1]}-{t_splited[2]}\n"
     
     # response = chain.invoke({"description":description, "tag":"\n".join(tag)})
     response = chain.invoke({"description":description, "tag":tag_str})
-    print(tag_str)
-    print(response.content)
-    indice = [int(r.split(".")[0]) - 1 for r in response.content.split("*")[1:]]
-    print(indice)
+    # print(tag_str)
+    print("[++] response.content", response.content)
+    indice = set()
+    for r in response.content.split("*")[1:]:
+        possible_indices = re.findall(r'\d+', r)
+        if len(possible_indices) > 0:
+            indice.add(int(possible_indices[0]) - 1)
+
+    #indice = [int(re.findall(r'\d+', r)[0]) - 1 for r in response.content.split("*")[1:]]
+    indice=list(indice)
     return response.content, indice
 
 
@@ -474,8 +487,8 @@ def test_structural_retrieval(configs):
                 print(f"Found top {found_index}", COUNT_FOUND, "/", COUNT_TOTAL, COUNT_BLOCKED_STRONG, COUNT_BLOCKED_WEAK)
                 print(i, found_index, category, tag_list, gt_tag_list, BLOCKED_STRONG, BLOCKED_WEAK)
                 
-            except:
-                print("An error occured")
+            except ValueError as e:
+                print("An error occured", e)
                 continue
             else:
                 break
@@ -645,8 +658,7 @@ def find_image(txt, configs, return_found_tags=False, return_image_as_url=False,
         assert(output_index > 0 and output_index < 5)
 
         category = category_tag_list[output_index - 1]
-        last_subtag_list = ["-".join(t.split(":")[1:]) for t in category_tag_set_dict[category] + other_tag_set]
-        response, tag_indice = sentence_to_tag(txt, last_subtag_list)
+        response, tag_indice = sentence_to_tag(txt, category_tag_set_dict[category] + other_tag_set)
         # make unique tag list
         CATEGORY_TAG_LEN = len(category_tag_set_dict[category])
         category_tag_indice = [ti for ti in tag_indice if ti < CATEGORY_TAG_LEN]
@@ -697,7 +709,7 @@ if __name__ == "__main__":
 
     # test_flat_retrieval()
     configs = json.load(open("configs.json", "r"))
-    # test_structural_retrieval(configs)
+    #test_structural_retrieval(configs)
     import pdb
     pdb.set_trace()
     
