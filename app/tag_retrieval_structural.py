@@ -133,8 +133,8 @@ def sentence_to_tag(description, tags):
 {description}
 
 옷 설명이 주어졌을 때 옷을 꾸미는 말들을 뽑고,
-각 꾸미는 말에 부합하는 태그의 번호를 아래에서 선택해줘. * 로 시작해야해.
-애매하게 부합하는 태그는 안되고, 정확하게 부합하는 태그들만 선택해야해.
+각 꾸미는 말에 부합하는 태그의 번호를 아래에서 선택해줘. "* <번호>. <태그> " 형식이야.
+애매하게 부합하는 태그는 안되고, direct match 태그들만 선택해야해.
 
 
 {tag}
@@ -152,7 +152,10 @@ def sentence_to_tag(description, tags):
     
     # response = chain.invoke({"description":description, "tag":"\n".join(tag)})
     response = chain.invoke({"description":description, "tag":tag_str})
+    print(tag_str)
+    print(response.content)
     indice = [int(r.split(".")[0]) - 1 for r in response.content.split("*")[1:]]
+    print(indice)
     return response.content, indice
 
 
@@ -633,8 +636,8 @@ def find_image(txt, configs, return_found_tags=False, return_image_as_url=False,
     t = time.time()
 
     for k in category_tag_set_dict.keys():
-        category_tag_set_dict[k] = list(category_tag_set_dict[k])
-    other_tag_set = list(other_tag_set)
+        category_tag_set_dict[k] = sorted(list(category_tag_set_dict[k]))
+    other_tag_set = sorted(list(other_tag_set))
 
 
     tag_list = []
@@ -642,7 +645,7 @@ def find_image(txt, configs, return_found_tags=False, return_image_as_url=False,
         assert(output_index > 0 and output_index < 5)
 
         category = category_tag_list[output_index - 1]
-        last_subtag_list = [t.split(":")[-1] for t in category_tag_set_dict[category] + other_tag_set]
+        last_subtag_list = ["-".join(t.split(":")[1:]) for t in category_tag_set_dict[category] + other_tag_set]
         response, tag_indice = sentence_to_tag(txt, last_subtag_list)
         # make unique tag list
         CATEGORY_TAG_LEN = len(category_tag_set_dict[category])
@@ -658,7 +661,6 @@ def find_image(txt, configs, return_found_tags=False, return_image_as_url=False,
     # for t in tag_wo_colon_list:
     #     assert(t in vocab.keys())
     search_tag_query = " ".join(tag_wo_colon_list)
-    print(response)
     print(search_tag_query)
     old_top_k = retriever.k
     retriever.k = num_images
