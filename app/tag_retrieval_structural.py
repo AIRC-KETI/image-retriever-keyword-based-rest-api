@@ -126,17 +126,20 @@ def load_category_to_tag_set_dict(configs):
 
 
 def sentence_to_tag(description, tags):
+    # 해당하는 태그의 번호를 '*'로 시작하는 bullet list로 출력해줘.
+
     user_msg = """\
 - 옷 설명
 {description}
 
-옷 설명이 주어졌을 때 다음 중 어울리는 태그를 최대한 선택해줘.
-해당하는 태그의 번호를 '*'로 시작하는 bullet list로 출력해줘.
+옷 설명이 주어졌을 때 옷을 꾸미는 말들을 뽑고,
+각 꾸미는 말에 부합하는 태그의 번호를 아래에서 선택해줘. * 로 시작해야해.
+애매하게 부합하는 태그는 안되고, 정확하게 부합하는 태그들만 선택해야해.
+
 
 {tag}
 
 """
-    
     template = ChatPromptTemplate.from_messages([
         ("system", "You are an expert in classifying fashion description to a related fashion category."),
         ("human", user_msg),
@@ -639,8 +642,8 @@ def find_image(txt, configs, return_found_tags=False, return_image_as_url=False,
         assert(output_index > 0 and output_index < 5)
 
         category = category_tag_list[output_index - 1]
-        
-        response, tag_indice = sentence_to_tag(txt, category_tag_set_dict[category] + other_tag_set)
+        last_subtag_list = [t.split(":")[-1] for t in category_tag_set_dict[category] + other_tag_set]
+        response, tag_indice = sentence_to_tag(txt, last_subtag_list)
         # make unique tag list
         CATEGORY_TAG_LEN = len(category_tag_set_dict[category])
         category_tag_indice = [ti for ti in tag_indice if ti < CATEGORY_TAG_LEN]
@@ -652,10 +655,11 @@ def find_image(txt, configs, return_found_tags=False, return_image_as_url=False,
     tt = time.time()
     tag_wo_colon_list = ["".join(t.split(":")) for t in tag_list]
 
-    for t in tag_wo_colon_list:
-        assert(t in vocab.keys())
+    # for t in tag_wo_colon_list:
+    #     assert(t in vocab.keys())
     search_tag_query = " ".join(tag_wo_colon_list)
-
+    print(response)
+    print(search_tag_query)
     old_top_k = retriever.k
     retriever.k = num_images
 
@@ -690,8 +694,8 @@ if __name__ == "__main__":
     # test_decide_style_necessity()
 
     # test_flat_retrieval()
-    configs = json.load(open("configs_public_cert.json", "r"))
-    test_structural_retrieval(configs)
+    configs = json.load(open("configs.json", "r"))
+    # test_structural_retrieval(configs)
     import pdb
     pdb.set_trace()
     
