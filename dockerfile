@@ -1,6 +1,8 @@
 FROM python:3.9-slim
 
 WORKDIR /app
+COPY ./app /app
+COPY ./sample.env /app/.env
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -15,4 +17,4 @@ RUN pip3 install -r requirements.txt
 
 EXPOSE 8000
 
-ENTRYPOINT ["bash", "./scripts/1_run_rest_api.sh"]
+ENTRYPOINT ["bash", "-c", "cd /app && pwd && ls && bash ./scripts/1_run_rest_api.sh"]
